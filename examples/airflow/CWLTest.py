@@ -1,15 +1,14 @@
 from __future__ import print_function
-import time
-from pprint import pprint, pformat
-from airflow import DAG
-from scidap.cwloperator import CWLOperator
-from datetime import datetime, timedelta
-import tempfile
-import shutil
-import glob
-import os
-import yaml
 
+from datetime import datetime, timedelta
+
+# Temporary solution
+import sys
+sys.path.append('/Users/porter/Work/scidap/scidap/modules/scidap')
+from cwldag import CWLDAG
+
+# from airflow import DAG
+# from scidap.cwloperator import CWLDAG
 
 start_day = datetime.combine(datetime.today() - timedelta(1),
                              datetime.min.time())
@@ -24,68 +23,11 @@ default_args = {
     # 'end_date': datetime(2016, 1, 1),
 }
 
-CWL_BASE = "/Users/porter/Work/scidap/workflows/tools/"
+CWL_BASE = "/Users/porter/Work/scidap/workflows/"
 WORKING_DIR = "/Users/porter/Work/scidap/workflows/tools/test-files"
-dags = {}
 
-if os.path.isfile(WORKING_DIR+"/run_test") and os.access(WORKING_DIR+"/run_test", os.R_OK):
-    os.remove(WORKING_DIR+"/run_test")
-
-    for i in range(10,20,1):
-        dag_id = 'bam-to-bigwig-'+str(i)
-        dag = DAG(dag_id, default_args=default_args)
-
-        cwl_s1 = CWLOperator(
-            cwl_command="bedtools-genomecov.cwl",
-            cwl_base=CWL_BASE,
-            working_dir=WORKING_DIR,
-            cwl_job=yaml.load("""{
-            "input": {
-                "class": "File",
-                "path": "rna.SRR948778.bam"
-            },
-            "genomeFile": {
-                "class": "File",
-                "path": "mm10-chrNameLength.txt"
-            },
-            "scale":1,
-            "dept":"-bg",
-            "genomecoverageout": "rna.SRR948778.bedGraph"
-                 }"""),
-            dag=dag)
-
-        cwl_s2 = CWLOperator(
-            cwl_command="linux-sort.cwl",
-            cwl_base=CWL_BASE,
-            working_dir=WORKING_DIR,
-            cwl_job=yaml.load("""{
-                     "input": {
-                         "class": "File",
-                         "path": "rna.SRR948778.bedGraph"
-                     },
-                     "key": ["1,1","2,2n"],
-                 }"""),
-            dag=dag)
-
-        cwl_s3 = CWLOperator(
-            cwl_command="ucsc-bedGraphToBigWig.cwl",
-            cwl_base=CWL_BASE,
-            working_dir=WORKING_DIR,
-            cwl_job=yaml.load("""{
-            "input": {
-                "class": "File",
-                "path": "rna.SRR948778.bedGraph.sorted"
-            },
-            "genomeFile": {
-                "class": "File",
-                "path": "mm10-chrNameLength.txt"
-            },
-            "bigWig": "rna.SRR948778.{{ params.i }}.bigWig"
-                 }"""),
-            params={'i': str(i)},
-            dag=dag)
-
-        cwl_s1.set_downstream(cwl_s2)
-        cwl_s2.set_downstream(cwl_s3)
-        globals()[dag_id] = dag
-
+dag = CWLDAG(
+    cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
+    cwl_base=CWL_BASE,
+    cwl_job=CWL_BASE+"workflows/scidap/job",
+    default_args=default_args)
