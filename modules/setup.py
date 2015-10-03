@@ -25,7 +25,8 @@ setup(
     zip_safe=False,
     install_requires=[
         'airflow',
-        'cwltool'
+        'cwltool',
+        'jsonmerge'
     ],
     extras_require={
         'mysql': mysql
