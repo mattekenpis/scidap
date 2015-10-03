@@ -1,14 +1,16 @@
-from __future__ import print_function
+#!/usr/bin/env python
+
+from airflow.models import DAG
+from airflow.utils import (apply_defaults)
 
 from datetime import datetime, timedelta
 
 # Temporary solution
-import sys
-sys.path.append('/Users/porter/Work/scidap/scidap/modules/scidap')
-from cwldag import CWLDAG
+# import sys
+# sys.path.append('scidap/scidap/modules/scidap')
+# from cwldag import CWLDAG
 
-# from airflow import DAG
-# from scidap.cwloperator import CWLDAG
+from scidap.cwldag import CWLDAG
 
 start_day = datetime.combine(datetime.today() - timedelta(1),
                              datetime.min.time())
@@ -24,10 +26,9 @@ default_args = {
 }
 
 CWL_BASE = "/Users/porter/Work/scidap/workflows/"
-WORKING_DIR = "/Users/porter/Work/scidap/workflows/tools/test-files"
 
 dag = CWLDAG(
-    cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
-    cwl_base=CWL_BASE,
-    cwl_job=CWL_BASE+"workflows/scidap/job",
-    default_args=default_args)
+ cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
+ cwl_job_folder=CWL_BASE+"workflows/scidap/job",
+ cwl_base=CWL_BASE,
+ default_args=default_args)

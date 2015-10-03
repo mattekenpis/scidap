@@ -1,7 +1,3 @@
-__author__ = 'porter'
-
-from __future__ import print_function
-
 from airflow import DAG
 # from scidap.cwloperator import CWLOperator
 # from scidap.cwloperator import CWLDAG
@@ -28,7 +24,7 @@ default_args = {
     # 'end_date': datetime(2016, 1, 1),
 }
 
-CWL_BASE = "/Users/porter/Work/scidap/workflows/"
+CWL_BASE = "/Users/porter/Work/scidap/workflows/tools/"
 WORKING_DIR = "/Users/porter/Work/scidap/workflows/tools/test-files"
 
 dags = {}
@@ -36,8 +32,7 @@ dags = {}
 if os.path.isfile(WORKING_DIR+"/run_test") and os.access(WORKING_DIR+"/run_test", os.R_OK):
     os.remove(WORKING_DIR+"/run_test")
 
-dag_id = 'bam-to-bigwig-'+str(i)
-dag = DAG(dag_id, default_args=default_args)
+dag = DAG(dag_id='bam-to-bigwig-', default_args=default_args)
 
 cwl_s1 = CWLOperator(
     cwl_command="bedtools-genomecov.cwl",

@@ -9,19 +9,19 @@ import logging
 from airflow.models import DAG
 from airflow.utils import (apply_defaults)
 
-import sys
-sys.path.append('/Users/porter/Work/scidap/scidap/modules/scidap')
-from cwlstepoperator import CWLStepOperator
-from jobfolderoperator import JobFolderOperator
-from jobfileoperator import JobFileOperator
+# Temporary solution
+# import sys
+# sys.path.append('scidap/scidap/modules/scidap')
+# from cwlstepoperator import CWLStepOperator
+# from jobfolderoperator import JobFolderOperator
+# from jobfileoperator import JobFileOperator
 
-# from scidap.cwloperator import CWLOperator
-# from scidap.jobfolderoperator import JobFolderOperator
-# from scidap.jobfileoperator import JobFileOperator
+from scidap.cwlstepoperator import CWLStepOperator
+from scidap.jobfolderoperator import JobFolderOperator
+from scidap.jobfileoperator import JobFileOperator
 
 from datetime import datetime, timedelta
 import os
-import sys
 
 
 def shortname(n):
