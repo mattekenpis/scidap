@@ -2,25 +2,19 @@
 #
 #
 
+import schema_salad.ref_resolver
 import cwltool.main
 import cwltool.workflow
 import cwltool.errors
-
-import schema_salad.ref_resolver
 import logging
 from airflow.models import BaseOperator
 from airflow.utils import (apply_defaults)
-
-import yaml
+from jsonmerge import merge
 import json
 import sys
 import os
 import copy
-from jsonmerge import merge
-
-
-def shortname(n):
-    return n.split("#")[-1].split("/")[-1]
+from cwlutils import shortname
 
 
 class CWLStepOperator(BaseOperator):
@@ -69,17 +63,16 @@ class CWLStepOperator(BaseOperator):
         for j in jobs:
             promises = merge(promises, json.loads(j))
 
-        if "scidap_working_folder" in promises:
-            self.working_dir = promises["scidap_working_folder"]
+        if "working_folder" in promises:
+            self.working_dir = promises["working_folder"]
             os.chdir(self.working_dir)
         else:
-            raise cwltool.errors.WorkflowException("scidap_working_folder is required")
+            raise cwltool.errors.WorkflowException("working_folder is required")
 
         jobobj = {}
         for inp in self.cwl_step.tool["inputs"]:
             inp_id = shortname(inp["id"])
             jobobj_id = inp_id.split(".")[-1]
-            logging.info("Making jobobj j_id:{0} inp_id:{1}".format(jobobj_id, inp_id))
 
             if "source" in inp:
                 source_id = shortname(inp["source"])
@@ -96,7 +89,6 @@ class CWLStepOperator(BaseOperator):
         job, _ = loader.resolve_all(jobobj, 'file://%s' % self.cwl_base)
         output = cwltool.main.single_job_executor(self.cwl_step.embedded_tool, job, self.working_dir, None,
                                                   outdir=self.working_dir)
-        # logging.info("Returned value: " + str(json.dumps(output)))
 
         for out in self.cwl_step.tool["outputs"]:
             out_id = shortname(out["id"])

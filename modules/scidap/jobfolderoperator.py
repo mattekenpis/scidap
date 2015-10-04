@@ -28,14 +28,15 @@ class JobFolderOperator(BaseOperator):
         self.poke_interval = poke_interval
 
     def execute(self, context):
-        logging.info("Options {0}: {1}".format(self.task_id, str(sys.argv)))
+        # logging.info("Options {0}: {1}".format(self.task_id, str(sys.argv)))
         logging.info(
             'Looking for files in {self.monitor_folder} {self.task_id}'.format(**locals()))
         while True:
             sleep(self.poke_interval)
-            if os.path.isdir(self.monitor_folder) and len(glob.glob(self.monitor_folder + '/*')) != 0:
+            if len(glob.glob(self.monitor_folder)) != 0:
                 # and os.access(self.monitor_folder, os.O_RDWR)
-                oldest = max(glob.iglob(self.monitor_folder+'/*'), key=os.path.getctime)
+                # os.path.isdir(self.monitor_folder) and
+                oldest = max(glob.iglob(self.monitor_folder), key=os.path.getctime)
 
                 with open(oldest, 'r') as f:
                     cwl_job_json = f.read()

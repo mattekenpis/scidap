@@ -1,0 +1,14 @@
+{
+    "working_folder": "path to the https://github.com/SciDAP/workflows/tree/master/tools/test-files ",
+    "input": {
+        "class": "File",
+        "path": "./rna.SRR948778.bam"
+    },
+    "genomeFile": {
+        "class": "File",
+        "path": "./mm10-chrNameLength.txt"
+    },
+    "scale": 1,
+    "dept":"-bg",
+    "bigWig": "./rna.SRR948778.bigwig"
+}

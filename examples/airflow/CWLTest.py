@@ -2,15 +2,12 @@
 
 from airflow.models import DAG
 from airflow.utils import (apply_defaults)
-
 from datetime import datetime, timedelta
-
-# Temporary solution
-# import sys
-# sys.path.append('scidap/scidap/modules/scidap')
-# from cwldag import CWLDAG
-
 from scidap.cwldag import CWLDAG
+from scidap.jobfolderoperator import JobFolderOperator
+# from scidap.jobfileoperator import JobFileOperator
+# from scidap.cwlutils import shortname
+
 
 start_day = datetime.combine(datetime.today() - timedelta(1),
                              datetime.min.time())
@@ -25,10 +22,12 @@ default_args = {
     # 'end_date': datetime(2016, 1, 1),
 }
 
-CWL_BASE = "/Users/porter/Work/scidap/workflows/"
+JOB_FOLDER = "/absolute/path/to/the/directory/with/cwl/job/json/files/*"
 
 dag = CWLDAG(
- cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
- cwl_job_folder=CWL_BASE+"workflows/scidap/job",
- cwl_base=CWL_BASE,
- default_args=default_args)
+    cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
+    default_args=default_args)
+
+# JobFileOperator(task_id=dag.dag_id + "_file", push_file="", dag=dag)
+
+dag.assign_job_reader(JobFolderOperator(task_id=dag.dag_id + "_folder", monitor_folder=JOB_FOLDER, dag=dag))
