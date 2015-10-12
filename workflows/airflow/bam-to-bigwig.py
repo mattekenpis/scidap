@@ -4,7 +4,7 @@ from airflow.models import DAG
 from airflow.configuration import conf
 from datetime import datetime, timedelta
 from scidap.cwldag import CWLDAG
-from scidap.jobfolderoperator import JobFolderOperator
+from scidap.jobdispatcher import JobDispatcher
 
 start_day = datetime.combine(datetime.today() - timedelta(1),
                              datetime.min.time())
@@ -23,5 +23,10 @@ dag = CWLDAG(
     cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
     default_args=default_args)
 
-dag.assign_job_reader(JobFolderOperator(task_id=dag.dag_id + "_folder", monitor_folder=conf.get('scidap', 'BIGWIG_JOB')
+dag.assign_job_dispatcher(JobDispatcher(task_id=dag.dag_id + "_monitor", monitor_folder=conf.get('scidap', 'BIGWIG_JOBS')
                                         , dag=dag))
+
+# if branches > 1:
+#     # make a top lvl branching with pass trough xpush
+#     pass
+

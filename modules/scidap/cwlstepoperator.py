@@ -37,6 +37,7 @@ class CWLStepOperator(BaseOperator):
 
         self.cwl_base = os.path.abspath(cwl_base) if cwl_base else os.path.abspath('.')
         self.working_dir = os.path.abspath('.')
+        self.outdir = None
 
         self.cwl_step = cwl_step
         step_id = shortname(cwl_step.tool["id"])
@@ -57,17 +58,25 @@ class CWLStepOperator(BaseOperator):
         loader = schema_salad.ref_resolver.Loader({"id": "@id"})
 
         upstream_task_ids = [t.task_id for t in self.upstream_list]
-        jobs = self.xcom_pull(context=context, task_ids=upstream_task_ids)
+        upstream_data = self.xcom_pull(context=context, task_ids=upstream_task_ids)
 
         promises = {}
-        for j in jobs:
-            promises = merge(promises, json.loads(j))
+        for j in upstream_data:
+            data = j
+            promises = merge(promises, data["promises"])
+            if "outdir" in data:
+                self.outdir = data["outdir"]
 
         if "working_folder" in promises:
             self.working_dir = promises["working_folder"]
-            os.chdir(self.working_dir)
         else:
             raise cwltool.errors.WorkflowException("working_folder is required")
+
+        if self.outdir:
+            os.chdir(self.outdir)
+        else:
+            raise cwltool.errors.WorkflowException("Outdir is not provided, please use job dispatcher")
+
 
         jobobj = {}
         for inp in self.cwl_step.tool["inputs"]:
@@ -83,12 +92,11 @@ class CWLStepOperator(BaseOperator):
                 jobobj[jobobj_id] = d
                 promises[inp_id] = d
 
-        # logging.info("Promises {self.task_id}: {promises}".format(**locals()))
-        # logging.info("Job {self.task_id}: {jobobj}".format(**locals()))
+        logging.info("Job {self.task_id}: {jobobj}".format(**locals()))
 
         job, _ = loader.resolve_all(jobobj, 'file://%s' % self.cwl_base)
         output = cwltool.main.single_job_executor(self.cwl_step.embedded_tool, job, self.working_dir, None,
-                                                  outdir=self.working_dir)
+                                                  outdir=self.outdir)
 
         for out in self.cwl_step.tool["outputs"]:
             out_id = shortname(out["id"])
@@ -96,4 +104,8 @@ class CWLStepOperator(BaseOperator):
             promises[out_id] = output[jobout_id]
 
         os.chdir(cur_dir)
-        return json.dumps(promises)
+        data = {}
+        data["promises"] = promises
+        data["outdir"] = self.outdir
+        logging.info("Data: {0}".format(data))
+        return data

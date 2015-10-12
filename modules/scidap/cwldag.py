@@ -9,6 +9,8 @@ from airflow.utils import (apply_defaults)
 from airflow.configuration import conf
 from cwlstepoperator import CWLStepOperator
 from cwlutils import shortname
+from jobcleanup import JobCleanup
+
 from datetime import timedelta
 import os
 import sys
@@ -81,13 +83,25 @@ class CWLDAG(DAG):
                     for out in step.tool["outputs"]:
                         outputs[out["id"]] = cwl_task
         # logging.info("CWLDag {0} has been loaded {1}".format(self.dag_id, str(sys.argv)))
+        outputs = {}
+        for out in self.cwlwf.tool["outputs"]:
+            outputs[shortname(out["source"])] = shortname(out["id"])
+
+        self.assign_job_cleanup(JobCleanup(task_id=self.dag_id+"_cleanup", outputs=outputs, dag=self))
+
 
     @property
     def tops(self):
         return [t for t in self.tasks if not t.upstream_list]
 
-    def assign_job_reader(self, task):
+    def assign_job_dispatcher(self, task):
         for t in self.tops:
             if t == task:
                 continue
             t.set_upstream(task)
+
+    def assign_job_cleanup(self, task):
+        for t in self.roots:
+            if t == task:
+                continue
+            task.set_upstream(t)

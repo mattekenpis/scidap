@@ -4,8 +4,7 @@ from airflow.models import DAG
 from airflow.utils import (apply_defaults)
 from datetime import datetime, timedelta
 from scidap.cwldag import CWLDAG
-from scidap.jobfolderoperator import JobFolderOperator
-# from scidap.jobfileoperator import JobFileOperator
+from scidap.jobdispatcher import JobDispatcher
 # from scidap.cwlutils import shortname
 
 
@@ -28,6 +27,4 @@ dag = CWLDAG(
     cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
     default_args=default_args)
 
-# JobFileOperator(task_id=dag.dag_id + "_file", push_file="", dag=dag)
-
-dag.assign_job_reader(JobFolderOperator(task_id=dag.dag_id + "_folder", monitor_folder=JOB_FOLDER, dag=dag))
+dag.assign_job_dispatcher(JobDispatcher(task_id=dag.dag_id + "_folder", monitor_folder=JOB_FOLDER, dag=dag))
