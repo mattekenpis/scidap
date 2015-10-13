@@ -18,47 +18,69 @@ class JobDispatcher(BaseOperator):
     @apply_defaults
     def __init__(
             self,
-            monitor_folder,
+            monitor_folder=None,
+            read_file=None,
             branches=4,
             poke_interval=30,
             op_args=None,
             op_kwargs=None,
             *args, **kwargs):
+
+        if (not read_file and not monitor_folder) or (read_file and monitor_folder):
+            raise Exception("monitor_folder or read_file is required")
+
         super(JobDispatcher, self).__init__(*args, **kwargs)
 
         self.monitor_folder = monitor_folder
+        self.read_file = read_file
         self.op_args = op_args or []
         self.op_kwargs = op_kwargs or {}
         self.poke_interval = poke_interval
         self.branches = branches
 
+    def mktmp(self):
+        if 'darwin' in sys.platform:
+            home = expanduser("~")
+            outdir = tempfile.mkdtemp(prefix=os.path.abspath(home + "/cwl_tmp/c"))
+        else:
+            outdir = tempfile.mkdtemp()
+        return outdir
+
     def execute(self, context):
         # logging.info("Options {0}: {1}".format(self.task_id, str(sys.argv)))
-        logging.info(
-            '{self.task_id}: Looking for files in {self.monitor_folder}'.format(**locals()))
-        while True:
-            tot_files = len(glob.glob(self.monitor_folder))
-            if tot_files != 0:
-                oldest = max(glob.iglob(self.monitor_folder), key=os.path.getctime)
+        cwl_context = {}
 
-                cwl_context = {}
-                with open(oldest, 'r') as f:
-                    cwl_context['promises'] = json.load(f)
+        if self.monitor_folder:
+            logging.info(
+                '{self.task_id}: Looking for files in {self.monitor_folder}'.format(**locals()))
+            while True:
+                tot_files = len(glob.glob(self.monitor_folder))
+                if tot_files != 0:
+                    oldest = max(glob.iglob(self.monitor_folder), key=os.path.getctime)
 
-                if 'darwin' in sys.platform:
-                    home = expanduser("~")
-                    outdir = tempfile.mkdtemp(prefix=os.path.abspath(home + "/cwl_tmp/c"))
+                    with open(oldest, 'r') as f:
+                        cwl_context['promises'] = json.load(f)
+
+                    cwl_context['outdir'] = self.mktmp()
+                    cwl_context['branch'] = tot_files % self.branches
+
+                    logging.info(
+                        'Found: {0} \n With context: {1}'.format(oldest, json.dumps(cwl_context)))
+
+                    os.remove(oldest)
+                    return cwl_context
                 else:
-                    outdir = tempfile.mkdtemp()
+                    sleep(self.poke_interval)
 
-                cwl_context['outdir'] = outdir
-                cwl_context['branch'] = tot_files % self.branches
+        elif self.read_file:
+            logging.info(
+                '{self.task_id}: Looking for files in {self.read_file}'.format(**locals()))
+            with open(self.read_file, 'r') as f:
+                cwl_context['promises'] = json.load(f)
 
+            cwl_context['outdir'] = self.mktmp()
 
-                logging.info(
-                    'Found: {0} \n With context: {1}'.format(oldest, json.dumps(cwl_context)))
+            logging.info(
+                'Found: {0} \n With context: {1}'.format(self.read_file, json.dumps(cwl_context)))
 
-                os.remove(oldest)
-                return cwl_context
-            else:
-                sleep(self.poke_interval)
+            return cwl_context

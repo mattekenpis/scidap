@@ -26,23 +26,19 @@ class CWLStepOperator(BaseOperator):
     def __init__(
             self,
             cwl_step,
-            cwl_base=None,
-
-            cwl_job=None,
-
             ui_color=None,
             op_args=None,
             op_kwargs=None,
             *args, **kwargs):
 
-        self.cwl_base = os.path.abspath(cwl_base) if cwl_base else os.path.abspath('.')
-        self.working_dir = os.path.abspath('.')
+        # self.cwl_base = os.path.abspath(cwl_base) if cwl_base else os.path.abspath('.')
+        self.working_dir = None
         self.outdir = None
 
         self.cwl_step = cwl_step
         step_id = shortname(cwl_step.tool["id"])
 
-        super(CWLStepOperator, self).__init__(task_id=step_id, *args, **kwargs)
+        super(self.__class__, self).__init__(task_id=step_id, *args, **kwargs)
 
         self.op_args = op_args or []
         self.op_kwargs = op_kwargs or {}
@@ -73,6 +69,8 @@ class CWLStepOperator(BaseOperator):
             raise cwltool.errors.WorkflowException("working_folder is required")
 
         if self.outdir:
+            if not os.path.exists(self.outdir):
+                os.makedirs(self.outdir)
             os.chdir(self.outdir)
         else:
             raise cwltool.errors.WorkflowException("Outdir is not provided, please use job dispatcher")
@@ -94,7 +92,7 @@ class CWLStepOperator(BaseOperator):
 
         logging.info("Job {self.task_id}: {jobobj}".format(**locals()))
 
-        job, _ = loader.resolve_all(jobobj, 'file://%s' % self.cwl_base)
+        job, _ = loader.resolve_all(jobobj, 'file://%s' % os.path.abspath('.'))
         output = cwltool.main.single_job_executor(self.cwl_step.embedded_tool, job, self.working_dir, None,
                                                   outdir=self.outdir)
 

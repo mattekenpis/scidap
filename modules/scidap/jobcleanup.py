@@ -22,6 +22,7 @@ class JobCleanup(BaseOperator):
     def __init__(
             self,
             outputs,
+            rm_files = None,
             op_args=None,
             op_kwargs=None,
             *args, **kwargs):
@@ -32,6 +33,7 @@ class JobCleanup(BaseOperator):
         self.outputs = outputs
         self.outdir = None
         self.working_dir = None
+        self.rm_files = rm_files or []
 
     def execute(self, context):
         # logging.info("Options {0}: {1}".format(self.task_id, str(sys.argv)))
@@ -73,5 +75,9 @@ class JobCleanup(BaseOperator):
         for out in self.outputs:
             if out in promises and promises[out]["class"] == "File":
                 shutil.move(promises[out]["path"], self.working_dir)
+
+        for rmf in self.rm_files:
+            if os.path.isfile(rmf):
+                os.remove(rmf)
 
         shutil.rmtree(self.outdir, True)

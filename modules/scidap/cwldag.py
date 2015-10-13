@@ -15,13 +15,16 @@ from datetime import timedelta
 import os
 import sys
 
+__cwl__tools_loaded__ = {}
+
+
 class CWLDAG(DAG):
-    @apply_defaults
+
     def __init__(
             self,
             cwl_workflow,
             dag_id=None,
-            schedule_interval=timedelta(minutes=1),
+            schedule_interval=timedelta(days=1),
             start_date=None, end_date=None,
             full_filepath=None,
             template_searchpath=None,
@@ -31,21 +34,28 @@ class CWLDAG(DAG):
             *args, **kwargs):
 
         _dag_id = dag_id if dag_id else cwl_workflow.split("/")[-1].replace(".cwl", "").replace(".", "_dot_")
-        super(CWLDAG, self).__init__(dag_id=_dag_id, schedule_interval=schedule_interval, default_args=default_args,
-                                     *args, **kwargs)
+        super(self.__class__, self).__init__(dag_id=_dag_id, schedule_interval=schedule_interval,
+                                             default_args=default_args, *args, **kwargs)
 
-        if os.path.isabs(cwl_workflow):
-            cwl_base = ""
-        else:
-            cwl_base = conf.get('cwl', 'CWL_HOME')
+        if cwl_workflow not in __cwl__tools_loaded__:
+            if os.path.isabs(cwl_workflow):
+                cwl_base = ""
+            else:
+                cwl_base = conf.get('cwl', 'CWL_HOME')
 
-        self.cwlwf = cwltool.main.load_tool(os.path.join(cwl_base, cwl_workflow), False, False,
-                                            cwltool.workflow.defaultMakeTool, True)
+            __cwl__tools_loaded__[cwl_workflow] = cwltool.main.load_tool(os.path.join(cwl_base, cwl_workflow), False,
+                                                                         False,
+                                                                         cwltool.workflow.defaultMakeTool, True)
 
-        if type(self.cwlwf) == int or self.cwlwf.tool["class"] != "Workflow":
-            raise cwltool.errors.WorkflowException(
-                "Class '{0}' is not supported yet in CWLDAG".format(self.cwlwf.tool["class"]))
+            if type(__cwl__tools_loaded__[cwl_workflow]) == int \
+                    or __cwl__tools_loaded__[cwl_workflow].tool["class"] != "Workflow":
+                raise cwltool.errors.WorkflowException(
+                    "Class '{0}' is not supported yet in CWLDAG".format(
+                        __cwl__tools_loaded__[cwl_workflow].tool["class"]))
 
+        self.cwlwf = __cwl__tools_loaded__[cwl_workflow]
+
+    def create(self):
         outputs = {}
         promises = {}
 
@@ -82,13 +92,7 @@ class CWLDAG(DAG):
 
                     for out in step.tool["outputs"]:
                         outputs[out["id"]] = cwl_task
-        # logging.info("CWLDag {0} has been loaded {1}".format(self.dag_id, str(sys.argv)))
-        outputs = {}
-        for out in self.cwlwf.tool["outputs"]:
-            outputs[shortname(out["source"])] = shortname(out["id"])
-
-        self.assign_job_cleanup(JobCleanup(task_id=self.dag_id+"_cleanup", outputs=outputs, dag=self))
-
+                        # logging.info("CWLDag {0} has been loaded {1}".format(self.dag_id, str(sys.argv)))
 
     @property
     def tops(self):
@@ -105,3 +109,10 @@ class CWLDAG(DAG):
             if t == task:
                 continue
             task.set_upstream(t)
+
+    def get_output_list(self):
+        # return [shortname(o) for o in self.cwlwf.tool["outputs"] ]
+        outputs = {}
+        for out in self.cwlwf.tool["outputs"]:
+            outputs[shortname(out["source"])] = shortname(out["id"])
+        return outputs
