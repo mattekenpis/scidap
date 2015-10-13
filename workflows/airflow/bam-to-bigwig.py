@@ -39,7 +39,7 @@ def fail_callback(context):
     if len(fail_file) != 1:
         raise Exception("Muts be one failed file:{0}".format(fail_file))
     shutil.move(fail_file[0], folder_fail)
-    print("Fail uid {0} file:".format(uid, fail_file[0]))
+    print("Fail uid {0} file: {1}".format(uid, fail_file[0]))
 
 
 def make_dag(file):
