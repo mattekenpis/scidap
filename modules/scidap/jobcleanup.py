@@ -75,9 +75,9 @@ class JobCleanup(BaseOperator):
         for out in self.outputs:
             if out in promises and promises[out]["class"] == "File":
                 dst_file = os.path.join(self.working_dir, os.path.basename(promises[out]["path"]))
-                if os.path.exists():
+                if os.path.exists(dst_file):
                     os.remove(dst_file)
-                shutil.move(promises[out]["path"], self.working_dir)
+                shutil.copy(promises[out]["path"], self.working_dir)
 
         for rmf in self.rm_files:
             if os.path.isfile(rmf):
