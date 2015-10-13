@@ -19,14 +19,14 @@ end_day = datetime.combine(datetime.today(),
 
 monitor_folder = conf.get('scidap', 'BIGWIG_JOBS')
 
-folder_new = monitor_folder + "/new/"
-monitor_folder_new = folder_new + "*"
+folder_new = os.path.join(monitor_folder, "new/")
+monitor_folder_new = os.path.join(folder_new, "*")
 
-folder_running = monitor_folder + "/running/"
-monitor_folder_running = folder_running + "*"
+folder_running = os.path.join(monitor_folder, "running/")
+monitor_folder_running = os.path.join(folder_running, "*")
 
-folder_fail = monitor_folder + "/fail/"
-monitor_folder_fail = folder_fail + "*"
+folder_fail = os.path.join(monitor_folder, "fail/")
+monitor_folder_fail = os.path.join(folder_fail, "*")
 
 max_dags_to_run = 10
 
@@ -35,7 +35,7 @@ default_args = {}
 
 def fail_callback(context):
     uid = context["dag"].dag_id.split("_")[0]
-    fail_file = glob.glob(folder_running+uid+"*")
+    fail_file = glob.glob(os.path.join(folder_running, uid+"*"))
     if len(fail_file) != 1:
         raise Exception("Muts be one failed file:{0}".format(fail_file))
     shutil.move(fail_file[0], folder_fail)
