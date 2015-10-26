@@ -12,10 +12,10 @@ import shutil
 import json
 import sys
 
-start_day = datetime.combine(datetime.today() - timedelta(1),
+start_day = datetime.combine(datetime.today() - timedelta(2),
                              datetime.min.time())
 end_day = datetime.combine(datetime.today(),
-                           datetime.min.time())
+                           datetime.min.time() + timedelta(4))
 
 monitor_folder = conf.get('scidap', 'BIGWIG_JOBS')
 
@@ -30,16 +30,14 @@ monitor_folder_fail = os.path.join(folder_fail, "*")
 
 max_dags_to_run = 10
 
-default_args = {}
-
 
 def fail_callback(context):
     uid = context["dag"].dag_id.split("_")[0]
     fail_file = glob.glob(os.path.join(folder_running, uid+"*"))
     if len(fail_file) != 1:
-        raise Exception("Muts be one failed file:{0}".format(fail_file))
+        raise Exception("Must be one failed file:{0}".format(fail_file))
     shutil.move(fail_file[0], folder_fail)
-    print("Fail uid {0} file: {1}".format(uid, fail_file[0]))
+    print("Failed uid: {0} file: {1}".format(uid, fail_file[0]))
 
 
 def make_dag(file):
@@ -73,6 +71,7 @@ def make_dag(file):
     dag = CWLDAG(
         dag_id=dag_id,
         cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
+        schedule_interval=timedelta(days=36500), # 100 ~years
         default_args=default_args)
     dag.create()
     dag.assign_job_dispatcher(JobDispatcher(task_id="read", read_file=file, dag=dag))

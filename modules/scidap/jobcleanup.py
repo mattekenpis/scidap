@@ -22,7 +22,7 @@ class JobCleanup(BaseOperator):
     def __init__(
             self,
             outputs,
-            rm_files = None,
+            rm_files=None,
             op_args=None,
             op_kwargs=None,
             *args, **kwargs):
@@ -70,7 +70,7 @@ class JobCleanup(BaseOperator):
             raise cwltool.errors.WorkflowException("Outdir is not provided, please use job dispatcher")
 
         logging.info(
-            'Cleanup: {0}\n{1}\n{2}'.format(promises, self.outdir, self.outputs))
+            'Cleanup: {0}\n{1}\n{2}\n{3}'.format(promises, self.outdir, self.outputs,self.rm_files))
 
         for out in self.outputs:
             if out in promises and promises[out]["class"] == "File":
