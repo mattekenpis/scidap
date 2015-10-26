@@ -28,7 +28,7 @@ router.get('/:shadow/:file', function(req, res, next) {
                 connection.query(
                     'SELECT name,COALESCE(description,"SciDAP") as description from egroup where shadow=?',[req.params['shadow']], function (err, rows, fields) {
                         if (err == null && rows.length > 0)
-                            res.render('hub',{'name':rows[0],'description':rows[0].description});
+                            res.render('hub',{'name':rows[0].name,'description':rows[0].description});
                             //res.render('hub',{'name':rows[0].name.replace(/ /g,'_'),'description':rows[0].description});
                         connection.release();
                     });
@@ -37,7 +37,7 @@ router.get('/:shadow/:file', function(req, res, next) {
         case "genomes.txt":
             pool.getConnection(function(err, connection) {
                 connection.query(
-                    'SELECT db from genome where id in (select distinct genome_id FROM labdata where egroup_id = ?)',[req.params['shadow']],
+                    'SELECT db from genome where id in (select distinct genome_id FROM labdata where shadow=?)',[req.params['shadow']],
                     function (err, rows, fields) {
                         if (!err)
                             res.render('genomes',{"data": rows});
@@ -56,7 +56,7 @@ router.get('/:shadow/:file', function(req, res, next) {
     if(req.params['file'] != "trackDb.txt") next();
     pool.getConnection(function(err, connection) {
         connection.query(
-            'SELECT id,uid,name4browser from labdata where egroup_id = ? and genome_id in ' +
+            'SELECT id,uid,name4browser from labdata where egroup_id = (select id from egroup where shadow=?) and genome_id in ' +
             '((select id from ems.genome where db = ?)) and deleted = 0',[req.params['shadow'],req.params['db']],
             function (err, rows, fields) {
                 console.log(err,rows,req.params);
