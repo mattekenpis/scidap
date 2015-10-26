@@ -53,22 +53,28 @@ router.get('/:shadow/:file', function(req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log(req.params);
-    if(req.params['file'] != "trackDb.txt") next();
-    pool.getConnection(function(err, connection) {
-        connection.query(
-            'SELECT id,uid,name4browser from labdata where egroup_id = (select id from egroup where shadow=?) and genome_id in ' +
-            '((select id from ems.genome where db = ?)) and deleted = 0',[req.params['shadow'],req.params['db']],
-            function (err, rows, fields) {
-                console.log(err,rows,req.params);
-                connection.release();
-                if (err == null && rows.length > 0) {
-                    res.render('trackdb', {"data": rows});
-                } else {
-                    next();
-                }
+    switch(req.params['file']){
+        case "trackDb.txt":
+            pool.getConnection(function(err, connection) {
+                connection.query(
+                    'SELECT id,uid,name4browser from labdata where egroup_id = (select id from egroup where shadow=?) and genome_id in ' +
+                    '((select id from ems.genome where db = ?)) and deleted = 0',[req.params['shadow'],req.params['db']],
+                    function (err, rows, fields) {
+                        console.log(err,rows,req.params);
+                        connection.release();
+                        if (err == null && rows.length > 0) {
+                            res.render('trackdb', {"data": rows});
+                        } else {
+                            next();
+                        }
 
+                    });
             });
-    });
+            break;
+        default:
+            next();
+            break;
+    }
 
 });
 
