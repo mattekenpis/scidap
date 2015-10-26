@@ -37,7 +37,7 @@ router.get('/:shadow/:file', function(req, res, next) {
         case "genomes.txt":
             pool.getConnection(function(err, connection) {
                 connection.query(
-                    'SELECT db from genome where id in (select distinct genome_id FROM labdata where shadow=?)',[req.params['shadow']],
+                    'SELECT db from genome where id in (select distinct genome_id FROM labdata where egroup_id = (select id from egroup where shadow=?))',[req.params['shadow']],
                     function (err, rows, fields) {
                         if (!err)
                             res.render('genomes',{"data": rows});
