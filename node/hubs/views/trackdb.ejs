@@ -1,0 +1,7 @@
+<% for(var i=0; i < data.length; i++) { %>
+track <%= data[i].id+'_'+data[i].name4browser.replace(/ /g,'_') %>
+bigDataUrl /RAW-DATA/<%= data[i].uid %>/<%= data[i].uid %>.bigWig
+shortLabel <%= data[i].name4browser.replace(/ /g,'_') %>
+longLabel <%= data[i].name4browser %>
+type bigWig
+<% } %>
