@@ -1,0 +1,10 @@
+<%
+for(var i = 0; i < data.length; i++) {
+if(data[i].etype.indexOf('RNA') > -1 && !(data[i].etype.indexOf('dUTP') > -1)) {
+	var d = data[i]; d.uidt = d.uid + '_grp'; d.uidf = d.uid; %>
+<%- include('track_bigwig', {data:d}) %><%
+}else if(data[i].etype.indexOf('RNA') > -1) {
+%>
+<%- include('track_bigwig_dutp', {data:data[i]}) %><%
+}
+} %>

@@ -1,0 +1,13 @@
+track <%= data.uid %>_multiwig
+container multiWig
+aggregate transparentOverlay
+showSubtrackColorOnUi on
+autoScale on
+alwaysZero on
+shortLabel <%= data.name4browser %>
+longLabel <%= data.name4browser %>
+type bigWig<%
+var d1=data; d1.uidf=d1.uid+'.P';d1.uidt=d1.uid+'_P';%><%-
+include('track_bigwig', {data:d1}) %><%
+var d2=data; d2.uidf=d1.uid+'.R';d2.uidt=d2.uid+'_R';d2.negate=true;d2.color='120,235,204';%><%-
+include('track_bigwig', {data:d2}) %>

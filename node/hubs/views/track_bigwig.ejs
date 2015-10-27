@@ -1,0 +1,13 @@
+track <%= data.uidt %>
+bigDataUrl /RAW-DATA/<%= data.uid %>/<%= data.uidf%>.bigWig
+autoScale on
+alwaysZero on
+shortLabel <%= data.name4browser %>
+longLabel <%= data.name4browser %>
+type bigWig<%
+if(data.parent){%>
+parent <%- data.parent %><%}%><%
+if(data.color){%>
+color <%- data.color %><%}%><%
+if(data.negate){%>
+negateValues on<%}%>
