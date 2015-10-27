@@ -1,4 +1,4 @@
-<%var orig=data.uid+'_multiwig'%>
+<%var orig=data.uid+'_multiwig'; orig=orig.replace(/-/g,'_'); data.parent=orig;%>
 track <%= orig %>
 container multiWig
 aggregate transparentOverlay
@@ -9,8 +9,8 @@ shortLabel <%= data.name4browser %>
 longLabel <%= data.name4browser %>
 type bigWig
 <%
-	var n4b=data.name4browser;
-var d1=data; d1.uidf=d1.uid+'.P';d1.uidt=d1.uid+'_P';d1.name4browser=n4b+' P';d1.parent=orig;%><%-
+var n4b=data.name4browser;
+var d1=data; d1.uidf=d1.uid+'.P';d1.uidt=d1.uid+'_P';d1.name4browser=n4b+' P';%><%-
 include('track_bigwig', {data:d1}) %><%
-var d2=data; d2.uidf=d2.uid+'.R';d2.uidt=d2.uid+'_R';d2.name4browser=n4b+' R';d2.negate=true;d2.parent=orig;d2.color='70,70,245';%><%-
+var d2=data; d2.uidf=d2.uid+'.R';d2.uidt=d2.uid+'_R';d2.name4browser=n4b+' R';d2.negate=true;d2.color='70,70,245';%><%-
 include('track_bigwig', {data:d2}) %>
