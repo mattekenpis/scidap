@@ -7,4 +7,8 @@ if(data[i].etype.indexOf('RNA') > -1 && !(data[i].etype.indexOf('dUTP') > -1)) {
 %>
 <%- include('track_bigwig_dutp', {data:data[i]}) %><%
 }
-} %>
+else if(data[i].etype.indexOf('DNA') > -1) {
+%>
+<%- include('track_bigwig_chip', {data:data[i]}) %><%
+}
+}%>

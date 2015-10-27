@@ -1,6 +1,6 @@
-<%var orig=data.uid+'_multiwig'; data.parent=orig;
+<%var orig=data.uid+'_grp'; data.parent=orig;
 %>track <%= orig %>
-container multiWig
+container multiWig -1000:1000
 aggregate transparentOverlay
 showSubtrackColorOnUi on
 autoScale on
@@ -11,7 +11,7 @@ type bigWig
 
 <%
 var n4b=data.name4browser;
-var d1=data; d1.uidf=d1.uid+'.P';d1.uidt=d1.uid+'_P';d1.name4browser=n4b+' P';%><%-
+var d1=data; d1.uidf=d1.uid+'.P';d1.uidt=d1.uid+'_P';d1.name4browser=n4b+' P';d1.color='245,70,70';%><%-
 include('track_bigwig', {data:d1}) %>
 <%
 var d2=data; d2.uidf=d2.uid+'.R';d2.uidt=d2.uid+'_R';d2.name4browser=n4b+' R';d2.negate=true;d2.color='70,70,245';%><%-
