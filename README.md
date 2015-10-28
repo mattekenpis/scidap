@@ -8,19 +8,49 @@ To enable Common Workflow Language ([CWL](https://github.com/common-workflow-lan
 
 CWL Airflow integration
 ==========================================
-To install airflow:
+
+Install from source
+-------------------
+
+* Airflow
 ```
 git clone https://github.com/SciDAP/airflow.git
 cd airflow
 sudo python setup.py install
 ```
-
-
-To install SciDAP airflow modules:
+* SciDAP airflow modules
 ```
 git clone https://github.com/SciDAP/scidap.git
 cd modules
 sudo python setup.py install
+```
+
+Example
+-------
+```Python
+from scidap.cwldag import CWLDAG
+
+...
+
+default_args = {
+    'owner': owner,
+    'start_date': start_day,
+    'email': [email],
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'end_date': end_day,
+    'on_failure_callback': fail_callback
+}
+
+...
+
+dag = CWLDAG(
+    dag_id=dag_id,
+    cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
+    schedule_interval=timedelta(days=1),
+    default_args=default_args)
+dag.create()
+
 ```
 
 
