@@ -16,7 +16,7 @@ var pool = mysql.createPool({
     database: config.db.database,
     port: config.db.port
 });
-
+console.log(config);
 router.get('/:shadow/:file', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
@@ -55,25 +55,24 @@ router.get('/:shadow/:file', function (req, res, next) {
     console.log(req.params);
     switch (req.params['file']) {
         case "trackDb.txt":
-            pool.getConnection(function (err, connection) {
-                connection.query(
-                    'SELECT l.id as id,uid,name4browser, etype ' +
-                    ' from labdata l ' +
-                    ' left join  experimenttype e on e.id=l.experimenttype_id ' +
-                    ' where egroup_id = (select id from egroup where shadow=?)' +
-                    ' and genome_id in ((select id from ems.genome where db = ?)) and deleted = 0'
-                    , [req.params['shadow'], req.params['db']],
-                    function (err, rows, fields) {
-                        console.log(err, rows, req.params);
-                        connection.release();
-                        if (err == null && rows.length > 0) {
-                            res.render('trackdbs', {"data": rows});
-                        } else {
-                            next();
-                        }
+            get_experiments(function(rows){
+                res.render('trackdbs', {"data": rows});
+            },req.params['shadow'],req.params['db'],next);
+            break;
+        default:
+            next();
+            break;
+    }
 
-                    });
-            });
+}).get('/wustl/:shadow/:db/:file', function (req, res, next) {
+    res.set('Content-Type', 'text/plain');
+
+    console.log("wustl",req.params);
+    switch (req.params['file']) {
+        case "trackDb.txt":
+            get_experiments(function(rows){
+                res.render('track_wustl', {"data": rows,"baseurl":config.hub.baseurl});
+            },req.params['shadow'],req.params['db'],next);
             break;
         default:
             next();
@@ -81,5 +80,28 @@ router.get('/:shadow/:file', function (req, res, next) {
     }
 
 });
+
+
+function get_experiments(callback,shadow,db,next){
+    pool.getConnection(function (err, connection) {
+        connection.query(
+            'SELECT l.id as id,uid,name4browser, etype ' +
+            ' from labdata l ' +
+            ' left join  experimenttype e on e.id=l.experimenttype_id ' +
+            ' where egroup_id = (select id from egroup where shadow=?)' +
+            ' and genome_id in ((select id from ems.genome where db = ?)) and deleted = 0'
+            , [shadow, db],
+            function (err, rows, fields) {
+                connection.release();
+                if (err == null && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    next();
+                }
+
+            });
+    });
+
+}
 
 module.exports = router;

@@ -1,0 +1,11 @@
+[
+<%for(var i = 0; i < data.length; i++) { %>
+{
+type:"bigWig",
+url: "<%= baseurl %>/RAW-DATA/<%= data[i].uid %>/<%= data[i].uid%>.bigWig",
+name:"<%= data[i].name4browser %> <%= data[i].etype %>",
+mode:"show",
+colorpositive:"#ff33cc"
+},
+<%}%>
+]
