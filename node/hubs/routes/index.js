@@ -60,7 +60,7 @@ router.get('/wustl/:shadow/:db/:file', function (req, res, next) {
             next();
             break;
     }
-}).get('/:shadow/:db/:id/:file', function (req, res, next) {
+}).get('/:shadow/:id/:db/:file', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log(req.params);
