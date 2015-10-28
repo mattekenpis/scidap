@@ -28,7 +28,7 @@ router.get('/wustl/:shadow/:db/:file', function (req, res, next) {
             break;
     }
 
-}).get('/:shadow/:file*', function (req, res, next) {
+}).get('/:shadow/:id/:file', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log(req.params);
@@ -60,14 +60,14 @@ router.get('/wustl/:shadow/:db/:file', function (req, res, next) {
             next();
             break;
     }
-}).get('/:shadow/:db/:file*', function (req, res, next) {
+}).get('/:shadow/:db/:id/:file', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log(req.params);
     switch (req.params['file']) {
         case "trackDb.txt":
             get_experiments(function(rows){
-                res.render('trackdbs', {"data": rows,"vid":req.params['0'].substr(1)});
+                res.render('trackdbs', {"data": rows,"vid":req.params['id']});
             },req.params['shadow'],req.params['db'],next);
             break;
         default:
