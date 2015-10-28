@@ -4,10 +4,6 @@ var config = require('../config/config');
 
 var router = express.Router();
 
-/* HUB GET home page. */
-//router.get('/:requesthub', function(req, res, next) {
-//    res.render('index', { title: 'Express',requesthub: req.params['requesthub'] });
-//});
 
 var pool = mysql.createPool({
     host: config.db.host,
@@ -16,8 +12,23 @@ var pool = mysql.createPool({
     database: config.db.database,
     port: config.db.port
 });
-console.log(config);
-router.get('/:shadow/:file', function (req, res, next) {
+
+router.get('/wustl/:shadow/:db/:file', function (req, res, next) {
+    res.set('Content-Type', 'text/plain');
+
+    console.log("wustl",req.params);
+    switch (req.params['file']) {
+        case "trackDb.txt":
+            get_experiments(function(rows){
+                res.render('track_wustl', {"data": rows,"baseurl":config.hub.baseurl});
+            },req.params['shadow'],req.params['db'],next);
+            break;
+        default:
+            next();
+            break;
+    }
+
+}).get('/:shadow/:file*', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log(req.params);
@@ -49,29 +60,14 @@ router.get('/:shadow/:file', function (req, res, next) {
             next();
             break;
     }
-}).get('/:shadow/:db/:file', function (req, res, next) {
+}).get('/:shadow/:db/:file*', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log(req.params);
     switch (req.params['file']) {
         case "trackDb.txt":
             get_experiments(function(rows){
-                res.render('trackdbs', {"data": rows});
-            },req.params['shadow'],req.params['db'],next);
-            break;
-        default:
-            next();
-            break;
-    }
-
-}).get('/wustl/:shadow/:db/:file', function (req, res, next) {
-    res.set('Content-Type', 'text/plain');
-
-    console.log("wustl",req.params);
-    switch (req.params['file']) {
-        case "trackDb.txt":
-            get_experiments(function(rows){
-                res.render('track_wustl', {"data": rows,"baseurl":config.hub.baseurl});
+                res.render('trackdbs', {"data": rows,"vid":req.params['0'].substr(1)});
             },req.params['shadow'],req.params['db'],next);
             break;
         default:
