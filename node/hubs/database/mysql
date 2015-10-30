@@ -1,0 +1,95 @@
+/**
+ * Created by porter on 10/28/15.
+ */
+
+var mysql = require('mysql');
+var config = require('../config/config');
+
+var pool = mysql.createPool({
+    host: config.db.host,
+    user: config.db.user,
+    password: config.db.password,
+    database: config.db.database,
+    port: config.db.port
+});
+
+
+var right_where=
+"( laboratory_id = (select laboratory_id from worker where shadow=?)"+
+" or egroup_id in"+
+" (select e.id from egroup e inner join worker w on e.laboratory_id=w.laboratory_id where w.shadow=?)"+
+" or egroup_id in" +
+" (select egroup_id from egrouprights e"+
+" inner join worker w on e.laboratory_id=w.laboratory_id where w.shadow=?)) ";
+
+function get_experiments(callback,shadow,db,next){
+    pool.getConnection(function (err, connection) {
+        connection.query(
+            'SELECT l.id as id,uid,name4browser, etype ' +
+            ' from labdata l ' +
+            ' left join  experimenttype e on e.id=l.experimenttype_id ' +
+            ' where egroup_id = (select id from egroup where shadow=?)' +
+            ' and genome_id in ((select id from ems.genome where db = ?)) and deleted = 0'
+            , [shadow, db],
+            function (err, rows, fields) {
+                connection.release();
+                if (err == null && rows.length > 0) {
+                    callback(rows);
+                } else {
+                    next();
+                }
+
+            });
+    });
+}
+
+function get_hub(callback,shadow,next) {
+    pool.getConnection(function (err, connection) {
+        connection.query(
+            'SELECT name,COALESCE(description,"SciDAP") as description from egroup where shadow=?', [shadow], function (err, rows) {
+                connection.release();
+                if (err == null && rows.length > 0)
+                    callback(rows);
+                else
+                    next();
+            });
+    });
+}
+
+function get_genomes(callback,shadow,next) {
+    pool.getConnection(function (err, connection) {
+        connection.query(
+            'SELECT db from genome where id in (select distinct genome_id FROM labdata where egroup_id = (select id from egroup where shadow=?))', [shadow],
+            function (err, rows, fields) {
+                connection.release();
+                if (!err)
+                    callback(rows);
+                else
+                    next();
+            });
+    });
+}
+
+function get_track(callback,shadow,id,next) {
+    pool.getConnection(function (err, connection) {
+        connection.query(
+            'SELECT l.id as id,uid,name4browser, etype ' +
+            ' from labdata l ' +
+            ' left join  experimenttype e on e.id=l.experimenttype_id ' +
+            ' where ' + right_where+
+            ' and l.id=? and deleted = 0'
+            , [shadow, shadow, shadow, id],
+            function (err, rows) {
+                connection.release();
+                if (!err)
+                    callback(rows);
+                else
+                    next();
+            });
+    });
+}
+
+module.exports.get_experiments = get_experiments;
+module.exports.get_hub = get_hub;
+module.exports.get_genomes = get_genomes;
+module.exports.get_track = get_track;
