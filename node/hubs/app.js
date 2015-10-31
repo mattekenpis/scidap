@@ -33,6 +33,12 @@ app.use(function(req, res, next) {
   next(err);
 });
 
+function send404(response) {
+  response.writeHead(404, { 'Content-Type': 'text/plain' });
+  response.write('Error 404: Resource not found.');
+  response.end();
+}
+
 // error handlers
 
 // development error handler
