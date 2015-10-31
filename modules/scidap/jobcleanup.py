@@ -3,8 +3,7 @@ from time import sleep
 from airflow.models import BaseOperator, TaskInstance
 from airflow.utils import apply_defaults, State
 from airflow import settings
-import sys
-import os
+import os, sys, stat
 import glob
 import tempfile
 import json
@@ -40,17 +39,6 @@ class JobCleanup(BaseOperator):
         # logging.info(
         #     '{self.task_id}: Looking for files in {self.outputs}'.format(**locals()))
 
-        # all_done = True
-        # while all_done:
-        #     all_done = False
-        #     for t in self.upstream_list:
-        #         ti = TaskInstance(
-        #             t, execution_date=context['ti'].execution_date)
-        #         if ti.state != State.SUCCESS:
-        #             all_done = True
-        #             break
-        #     sleep(1)
-
         upstream_task_ids = [t.task_id for t in self.upstream_list]
         upstream_data = self.xcom_pull(context=context, task_ids=upstream_task_ids)
 
@@ -78,6 +66,7 @@ class JobCleanup(BaseOperator):
                 if os.path.exists(dst_file):
                     os.remove(dst_file)
                 shutil.copy(promises[out]["path"], self.working_dir)
+                os.chmod(promises[out]["path"], stat.S_IWGRP)
 
         for rmf in self.rm_files:
             if os.path.isfile(rmf):

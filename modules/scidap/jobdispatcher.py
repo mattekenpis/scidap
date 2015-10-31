@@ -41,6 +41,8 @@ class JobDispatcher(BaseOperator):
     def mktmp(self):
         if 'darwin' in sys.platform:
             home = expanduser("~")
+            if not os.path.exists(os.path.abspath(home + "/cwl_tmp/")):
+                os.mkdir(os.path.abspath(home + "/cwl_tmp/", 0777))
             outdir = tempfile.mkdtemp(prefix=os.path.abspath(home + "/cwl_tmp/c"))
         else:
             outdir = tempfile.mkdtemp()

@@ -1,6 +1,7 @@
-#!/usr/bin/env python
 #
-#
+# CWLStepOperator is required for CWLDAG
+#   CWLStepOperator execute stage expects input job from xcom_pull
+#   and post output by xcom_push
 
 import schema_salad.ref_resolver
 import cwltool.main

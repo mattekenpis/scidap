@@ -1,4 +1,7 @@
-#!/usr/bin/env python
+#
+# CWLDAG creates airfow DAG where each step is CWLStepOperator
+#  to assign steps upfront of CWL
+#
 
 import cwltool.main
 import cwltool.workflow
@@ -24,17 +27,11 @@ class CWLDAG(DAG):
             self,
             cwl_workflow,
             dag_id=None,
-            schedule_interval=timedelta(days=1),
-            start_date=None, end_date=None,
-            full_filepath=None,
-            template_searchpath=None,
-            user_defined_macros=None,
             default_args=None,
-            params=None,
             *args, **kwargs):
 
         _dag_id = dag_id if dag_id else cwl_workflow.split("/")[-1].replace(".cwl", "").replace(".", "_dot_")
-        super(self.__class__, self).__init__(dag_id=_dag_id, schedule_interval=schedule_interval,
+        super(self.__class__, self).__init__(dag_id=_dag_id,
                                              default_args=default_args, *args, **kwargs)
 
         if cwl_workflow not in __cwl__tools_loaded__:

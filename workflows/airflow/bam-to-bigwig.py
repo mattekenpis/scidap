@@ -12,10 +12,12 @@ import shutil
 import json
 import sys
 
-start_day = datetime.combine(datetime.today() - timedelta(366),
-                             datetime.min.time())
-end_day = datetime.combine(datetime.today() + timedelta(10),
-                           datetime.min.time())
+# start_day = datetime.combine(datetime.today() - timedelta(366),
+#                              datetime.min.time())
+# end_day = datetime.combine(datetime.today() + timedelta(10),
+#                            datetime.min.time())
+
+_delta = 10 #days
 
 monitor_folder = conf.get('scidap', 'BIGWIG_JOBS')
 
@@ -48,6 +50,14 @@ def make_dag(file):
         raise Exception("UID must be part of the job")
 
     uid = job["uid"]
+    if "start_day" in job:
+        start_day = job["start_day"]
+    else:
+        start_day = datetime.combine(datetime.utcfromtimestamp(os.path.getctime(file)) - timedelta(_delta+1),
+                                     datetime.min.time())
+
+    end_day = datetime.combine(datetime.today() + timedelta(_delta-1),
+                               datetime.min.time())
 
     owner = 'SciDAP'
     if "author" in job:
@@ -71,7 +81,7 @@ def make_dag(file):
     dag = CWLDAG(
         dag_id=dag_id,
         cwl_workflow="workflows/scidap/bam-genomecov-bigwig.cwl",
-        schedule_interval=timedelta(days=365),  # 1 ~years
+        schedule_interval=timedelta(days=_delta),
         default_args=default_args)
     dag.create()
     dag.assign_job_dispatcher(JobDispatcher(task_id="read", read_file=file, dag=dag))
