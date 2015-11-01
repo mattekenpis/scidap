@@ -56,7 +56,7 @@ def make_dag(file):
         start_day = datetime.combine(datetime.utcfromtimestamp(os.path.getctime(file)) - timedelta(_delta+1),
                                      datetime.min.time())
 
-    end_day = datetime.combine(datetime.today() + timedelta(_delta-1),
+    end_day = datetime.combine(start_day + timedelta(_delta-1),
                                datetime.min.time())
 
     owner = 'SciDAP'
