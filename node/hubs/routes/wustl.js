@@ -9,7 +9,7 @@ var get_experiments = require('../database/mysql').get_experiments;
 var router = express.Router();
 
 
-router.get('/wustl/:shadow/:db/:file', function (req, res, next) {
+router.get('/:shadow/:db/:file', function (req, res, next) {
     res.set('Content-Type', 'text/plain');
 
     console.log("wustl", req.params);
@@ -25,4 +25,4 @@ router.get('/wustl/:shadow/:db/:file', function (req, res, next) {
     }
 });
 
-module.exports = router;
+module.exports.tracks = router;

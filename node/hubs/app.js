@@ -25,6 +25,7 @@ app.use(cookieParser());
 
 app.use('/track', ucsc.track);
 app.use('/ucsc', ucsc.tracks);
+app.use('/wustl', wustl.tracks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
