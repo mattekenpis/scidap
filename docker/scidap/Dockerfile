@@ -42,6 +42,7 @@ RUN apt-get clean all &&\
         git             \
         wget            \
         zip             \
+        unzip           \
         openjdk-7-jre   \
         build-essential \
         pkg-config      \

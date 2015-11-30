@@ -1,8 +1,8 @@
 #################################################################
 # Dockerfile
 #
-# Software:         SciDAP bwa Image
-# Software Version: 2015
+# Software:         Alea
+# Software Version: 1.2.2
 # Description:      Alea image for SciDAP
 # Website:          http://scidap.com/
 # Provides:         alea|bwa|bowtie|Plink|vcftools|bedGraphToBigWig|shapeit2
