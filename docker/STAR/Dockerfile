@@ -25,7 +25,7 @@ WORKDIR /tmp
 
 ENV VERSION 2.5.0b
 ENV NAME STAR
-ENV URL "https://github.com/alexdobin/STAR/archive/${NAME}_${VERSION}.tar.gz"
+ENV URL "https://github.com/alexdobin/STAR/archive/${VERSION}.tar.gz"
 
 RUN wget -q -O - $URL | tar -zxv && \
 cd ${NAME}-${NAME}_${VERSION}/source && \
