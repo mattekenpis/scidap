@@ -28,10 +28,10 @@ ENV NAME STAR
 ENV URL "https://github.com/alexdobin/STAR/archive/${VERSION}.tar.gz"
 
 RUN wget -q -O - $URL | tar -zxv && \
-cd ${NAME}-${NAME}_${VERSION}/source && \
+cd ${NAME}-${VERSION}/source && \
 make -j 4 && \
 cd .. && \
 cp ./bin/Linux_x86_64_static/STAR /usr/local/bin/ && \
 cd .. && \
 strip /usr/local/bin/${NAME}; true && \
-rm -rf ./${NAME}-${NAME}_${VERSION}/
+rm -rf ./${NAME}-${VERSION}/
