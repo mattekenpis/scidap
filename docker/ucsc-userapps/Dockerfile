@@ -2,14 +2,14 @@
 # Dockerfile
 #
 # Software:         ucsc userApps
-# Software Version: v323
+# Software Version: v325
 # Description:      ucsc userApps image for SciDAP
 # Website:          http://hgdownload.cse.ucsc.edu/admin/exe/userApps.v325.src.tgz, http://scidap.com/
 # Provides:         bedGraphToBigWig
 # Base Image:       scidap/scidap:v0.0.1
-# Build Cmd:        docker build --rm -t scidap/ucsc-userapps:v323 .
-# Pull Cmd:         docker pull scidap/ucsc-userapps:v323
-# Run Cmd:          docker run --rm scidap/ucsc-userapps:v323 bash
+# Build Cmd:        docker build --rm -t scidap/ucsc-userapps:v325 .
+# Pull Cmd:         docker pull scidap/ucsc-userapps:v325
+# Run Cmd:          docker run --rm scidap/ucsc-userapps:v325 bash
 #################################################################
 
 ### Base Image
@@ -35,7 +35,7 @@ RUN apt-get clean all &&\
 
 ### Installing ucsc userApps
 
-ENV VERSION 323
+ENV VERSION 325
 ENV NAME "ucsc-userapps"
 ENV URL "http://hgdownload.cse.ucsc.edu/admin/exe/userApps.v${VERSION}.src.tgz"
 
