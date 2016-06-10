@@ -1,7 +1,8 @@
 import logging
 from time import sleep
 from airflow.models import BaseOperator, TaskInstance
-from airflow.utils import apply_defaults, State
+from airflow.utils import apply_defaults 
+from airflow.utils.state import State
 from airflow import settings
 import os, sys, stat
 import glob
